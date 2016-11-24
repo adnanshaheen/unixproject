@@ -1,0 +1,67 @@
+infile=$1"_G4"
+ofile1=$1"_G5"
+ofile2=$1"_G6"
+
+line=$1
+arr=(`echo $line | tr ':' ' '`)
+hdr="COURSE:${ar[0]}	SECTION:${ar[1]}	SEMESTER:FALL 200	NUMBER OF STUDENTS:$count	CREDIT HOURS:3	PROF: ABDELSHAKOUR ABUZNEID"
+echo $hdr > $ofile1
+echo $hdr > $ofile2
+
+shdr="SID	LNAME	FNAME	GRADE"
+echo $shdr >> $ofile1
+echo $shdr >> $ofile2
+shdr="---	---	---	---"
+echo $shdr >> $ofile1
+echo $shdr >> $ofile2
+
+echo "$hdr"
+
+cou=$1
+ar=(`echo $cou | tr '_' ' '`)
+count=0
+
+while read line
+do
+	if [[ $line != "SID:"* ]]
+	then
+		count=`expr $count + 1`
+		arr=(`echo $line | tr ':' ' '`)
+		sid=${arr[0]}
+		lname=${arr[1]}
+		fname=${arr[2]}
+		ne=${#arr[@]}
+
+		ne1=`expr $ne - 1`
+		lg=${arr[$ne1]}
+
+		ne2=`expr $ne - 2`
+		cg=${arr[$ne2]}
+
+		lline="$sid	$lname	$fname	$lg"
+		nline="$sid	$lname	$fname	$cg"
+		echo $lline
+		echo $nline
+		echo $lline >> $ofile1
+		echo $nline >> $ofile2
+	fi
+	
+done <$infile
+
+temp=$(grep "COURSE:" $ofile1)
+hdr="COURSE:${ar[0]}	SECTION:${ar[1]}	SEMESTER:FALL 200	NUMBER OF STUDENTS:$count	CREDIT HOURS:3	PROF: ABDELSHAKOUR ABUZNEID"
+sed 's/'"$temp"'/'"$hdr"'/g' $ofile1 >  tmpfile; mv tmpfile $ofile1
+sed 's/'"$temp"'/'"$hdr"'/g' $ofile2 >  tmpfile; mv tmpfile $ofile2
+
+bl=""
+echo $bl >> $ofile1
+echo $bl >> $ofile2
+bl=""
+echo $bl >> $ofile1
+echo $bl >> $ofile2
+bl=""
+echo $bl >> $ofile1
+echo $bl >> $ofile2
+bl="PROF SIGNATURE:			DATE:$(date +"%m.%d.%Y")"
+echo $bl >> $ofile1
+echo $bl >> $ofile2

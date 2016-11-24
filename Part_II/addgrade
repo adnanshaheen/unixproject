@@ -1,0 +1,100 @@
+array_data=""
+filename=$1"_G"
+echo "WHAT IS THE TITLE OF THE GRADE?"
+read grdtle
+echo "YOU ARE GOING TO ADD THE GRADE OF $grdtle ....."
+echo "HOW DO YOU LIKE TO SEARCH FOR THE USER?(LNAME/FNAME/SID)?"
+read grdsrchopt
+grdsrchopt=$(echo $grdsrchopt | tr '[:lower:]' '[:upper:]')
+echo "YOU ARE GOING TO USE THE $grdsrchopt. PLEASE MAKE SURE THAT THE NAME IS MATCHING ....."
+echo
+
+loop="Y"
+counter=0
+echo $grdsrchopt":"
+read grdsrchinput
+while [[ $loop == "Y" ]]
+do
+key=$grdsrchinput":"
+
+temp=$(grep "$key" $filename)
+if [ "$temp" ];
+then
+
+        arr=(`echo $temp | tr ':' ' '`)
+        ne=${#arr[@]}
+	echo "IT'S  ${arr["1"]},  ${arr["2"]} CORRECT(Y/N)?"
+	read optyn
+	optyn=$(echo $optyn | tr '[:lower:]' '[:upper:]')
+	if [ $optyn == "Y" ]
+	then
+		echo "THE GRADE OF $grdtle:"	
+		read grdval
+		array_data+=${arr["0"]}":"${arr["1"]}":"${arr["2"]}":"$grdtle":"$grdval" "
+		echo $array_data
+
+		counter=`expr $counter + 1`
+		echo $counter
+	else
+		echo "SKIP TO THE NEXT USER OR SEARCH AGAIN?((L)ASTNAME/(F)IRST/(S)KIP?" ##
+	fi
+fi
+
+echo $grdsrchopt":"
+read grdsrchinput
+grdsrchinput=$(echo $grdsrchinput | tr '[:lower:]' '[:upper:]')
+if [[ $grdsrchinput == "ESC" ]]
+then
+	loop="F"
+fi
+
+done
+cls=$(echo $1 | tr '[:lower:]' '[:upper:]')
+echo "YOU HAVE ADDED THE GRADE OF $grdtle TO $counter STUDENTS OF $cls."
+echo
+echo "QUIT NOW(Y/N)?"
+read qyn
+if [[ $qyn == "y" ]] || [[ $qyn == "Y" ]]
+then
+	echo "SORTING ..."
+	filename2=$filename"2"
+	filebuf=$(awk -F: '{print $2, $0 }' $filename | sort | sed 's/^.* //')
+
+	arr=(`echo $filebuf | tr ' ' ' '`)
+	echo "SID:LNAME:FNAME" > $filename2
+	ne=${#arr[@]}
+	cnt=0
+	while [ $cnt -lt $ne ]
+	do
+		if [[  ${arr[$cnt]} == "SID"* ]]
+		then
+			echo
+		else
+			echo ${arr[$cnt]} >> $filename2
+		fi
+		cnt=`expr $cnt + 1`
+	done
+
+	cat $filename2
+	echo
+	echo "SAVING ..."
+	arr=(`echo $array_data | tr ' ' ' '`)
+	ne=${#arr[@]}
+	cnt=0
+	while [ $cnt -lt $ne ]
+	do
+		arr2=(`echo ${arr[$cnt]} | tr ':' ' '`)
+		str=${arr2["0"]}":"${arr2["1"]}":"${arr2["2"]}
+		temp=$(grep "$str" $filename2)
+		repstr=$temp":"${arr2["3"]}":"${arr2["4"]}
+		echo "str:$str temp:$temp repstr:$repstr"
+		sed 's/'$temp'/'$repstr'/' $filename2 >  tmpfile; mv tmpfile $filename2 
+		cnt=`expr $cnt + 1`
+	done
+
+        hdrkey="SID:LNAME:FNAME"
+	temp=$(grep "$hdrkey" $filename2)
+	repstr=$temp":"$grdtle
+	sed 's/'$temp'/'$repstr'/' $filename2 >  tmpfile; mv tmpfile $filename2 
+	echo $array_data
+fi

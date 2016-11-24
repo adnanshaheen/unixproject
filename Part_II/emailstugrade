@@ -1,0 +1,41 @@
+infile=$1"_G4"
+infile2="inputfile"
+ofile1=$1"_G5"
+ofile2=$1"_G6"
+line=$1
+ar=(`echo $line | tr ':' ' '`)
+
+while read line
+do
+	if [[ $line != "SID:"* ]]
+	then
+		count=`expr $count + 1`
+		arr=(`echo $line | tr ':' ' '`)
+		sid=${arr[0]}
+		lname=${arr[1]}
+		fname=${arr[2]}
+
+		ne=${#arr[@]}
+
+		ne1=`expr $ne - 1`
+		lg=${arr[$ne1]}
+
+		ne2=`expr $ne - 2`
+		cg=${arr[$ne2]}
+
+		lline="$sid	$lname	$fname	$lg"
+		nline="$sid	$lname	$fname	$cg"
+
+		srchstr="$lname":"$fname":"$sid"
+	
+		temp=$(grep "$srchstr" $infile2)
+		arr=(`echo $temp | tr ':' ' '`)
+		semail="${arr[3]}"
+		echo $semail
+	
+		msg="COURSE:${ar[0]}	SECTION:${ar[1]}	NAME:$lname","$fname	SID:$sid	NUMBER:$cg	GRADE:$lg"
+		echo $msg
+	fi
+	
+done <$infile
+

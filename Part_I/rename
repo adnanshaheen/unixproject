@@ -1,0 +1,56 @@
+remren_ml()
+{
+	from=$1
+	to=$2
+	echo $to
+	echo $from
+	mv $from $to
+}
+
+sbn="":
+sen="":
+if [ "$#" -eq 0 ]
+then
+	echo "no arguments"
+        exit;
+fi
+
+TO=""
+FROM=""
+
+for i in "$@"
+do
+case $i in 
+	-to)
+	shift
+	a=$1
+	if [[ $a == -* ]]
+	then
+		TO=""
+	else
+		TO=$1
+	fi
+	shift
+	;;
+
+	-from)
+	shift
+
+	a=$1
+	if [[ $a == -* ]]
+	then
+		FROM=""
+	else
+		FROM=$1
+	fi
+	shift
+	;;
+
+	--default)
+	shift
+	;;
+	*)
+	;;
+esac
+done
+remren_ml $FROM $TO

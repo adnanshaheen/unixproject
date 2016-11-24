@@ -1,0 +1,34 @@
+infile=$1"_G2"
+echo $@
+
+if [ $# -lt 5 ]
+then
+	echo "usage: finalgrade <file> <e_per> <h_per> <q_per> <p_per> "
+	exit
+fi
+
+e_per=$2
+h_per=$3
+q_per=$4
+p_per=$5
+while read line
+do
+	if [[ $line != "SID:"* ]]
+	then
+		arr=(`echo $line | tr ':' ' '`)
+		ne=${#arr[@]}
+		hi=`expr $ne - 4`
+		h=${arr["$hi"]}
+		qi=`expr $ne - 3`
+		q=${arr["$qi"]}
+		ei=`expr $ne - 2`
+		e=${arr["$ei"]}
+		pi=`expr $ne - 1`
+		p=${arr["$pi"]}
+		y=`expr $h \* $h_per + $e \* $e_per + $p \* $p_per + $q \* $q_per`
+
+		grdval=`expr $y / 100`
+		echo $line
+		echo "grade:" $grdval
+	fi
+done <$infile

@@ -1,0 +1,100 @@
+infile=$1"_G"
+infile2=$infile"2"
+echo
+echo "ADDING  HW GRADES FOR ALL STUDENTS   .....      DONE"
+echo
+echo "ADDING  EXAM GRADES FOR ALL STUDENTS   .....      DONE"
+echo
+echo "ADDING  QUIZ GRADES FOR ALL STUDENTS   .....      DONE"
+echo
+echo "ADDING  PROJ GRADES FOR ALL STUDENTS   .....      DONE"
+echo
+
+sed 's/'"::"'/'":-:"'/g' $infile >  tmpfile; mv tmpfile $infile
+sed 's/'"::"'/'":-:"'/g' $infile >  tmpfile; mv tmpfile $infile
+key="SID:LNAME:FNAME"
+temp=$(grep "$key" $infile)
+
+echo $temp":h:q:p:e" > $infile2
+
+arrhdr=(`echo $temp | tr ':' ' '`)
+ne=${#arrhdr[@]}
+
+nes=3
+while [ $nes -lt $ne ]
+do
+
+	case ${arrhdr[$nes]} in
+		"h"*)
+		array_sum+="0:"
+		;;
+
+		"p"*)
+		array_sum+="3:"
+		;;
+
+		"e"*)
+		array_sum+="2:"
+		;;
+
+		"q"*)
+		array_sum+="1:"
+		;;
+	esac
+	nes=`expr $nes + 1`
+done
+
+arrhdrmap=(`echo $array_sum | tr ':' ' '`)
+
+tarray_sum="0:0:0:0";
+
+while read line
+do
+	h=0
+	p=0
+	q=0
+	e=0
+
+	if [[ $line != "SID:"* ]]
+	then
+		arr=(`echo $line | tr ':' ' '`)
+		ne=${#arr[@]}
+		count=3
+		while [ $count -lt $ne ]
+		do
+			acont=`expr $count - 3`
+			a=${arr["$count"]}
+
+			if [[ ${arr["$count"]} == "-" ]]
+			then
+				a=0
+			fi
+
+			ind=${arrhdrmap["$acont"]}
+
+			case $ind in
+				"0")
+				h=`expr $h + $a`
+				;;
+
+				"1")
+				q=`expr $q + $a`
+				;;
+
+				"2")
+				e=`expr $e + $a`
+				;;
+
+				"3")
+				p=`expr $p + $a`
+				;;
+			esac
+
+			count=`expr $count + 1`
+		done
+
+		entry=$line":"$h":"$q":"$e":"$p
+		echo $entry >> $infile2
+	fi
+done <$infile
+

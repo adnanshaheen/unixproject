@@ -1,0 +1,32 @@
+sbn="1"
+sen="1"
+if [ "$#" -eq 0 ]
+then
+	echo "no arguments"
+        exit;
+fi
+
+if [ "$#" -gt 0 -a -n "$1" ] 
+then
+        arr=(`echo $2 | tr '-' ' '`)
+	sen=${arr[0]};
+fi
+
+if [ "$#" -eq 1 ]
+then
+	sen=1
+fi
+
+timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+infile="inputfile"$timestamp
+> $infile
+counter=$sbn
+echo "counter="$counter
+echo "sen="$sen
+while [ $counter -le $sen ]
+do
+	echo "ENTER STUDENT $counter:"
+	read entry
+        echo $entry >> $infile
+	counter=`expr $counter + 1`
+done

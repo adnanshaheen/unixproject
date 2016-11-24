@@ -1,0 +1,44 @@
+infile="inputfile"
+awk -F: '{print $2, $0 }' $infile | sort | sed 's/^.* //'
+echo "ENTER THE LAST NAME:"
+read lname
+echo "ENTER THE FNAME NAME:"
+read fname
+echo "ENTER SID:"
+read sid
+echo "ENTER EMAIL:"
+read email
+echo "ENTER PHONE:"
+read phno
+
+entry=$fname":"$lname":"$sid":"$email":"$phno
+echo $entry
+
+entkey=$sid":"$email":"
+if [ "$email" ];
+then
+	email=$email":"
+else
+	email="::"
+	entkey=$sid"::"
+fi
+temp=$(grep "$email\|$entkey" $infile)
+if [ "$temp" ];
+then
+	IN=$temp | sed -e 's/$IFS/\n/g'
+        
+	while read i; do
+                echo $i | awk '{split($0, a, ":"); print "THIS USER HAS THE SAME KEY AS " a[1] " " a[2] ", THE ENTRY IS," }'
+		     echo "- $i" 
+        done <<< "$temp"
+	echo "ADD THIS STUDENT(Y/N)?"
+        read yesno
+        if [[ $yesno == "Y" || $yesno == 'y'  ]]
+	then
+		echo $entry
+        	echo $entry >> $infile
+	fi
+else
+	echo
+       	echo $entry >> $infile
+fi

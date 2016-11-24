@@ -1,0 +1,42 @@
+rem_data()
+{
+	fname=$1
+	lname=$2
+	infile="inputfile"
+	filebuf=$(cat $infile)
+	key=$fname":"$lname":"
+	temp=$(egrep "$key" $infile)
+	echo $temp
+	if [ "$temp" ];
+	then
+		IN=$temp | sed -e 's/$IFS/\n/g'
+       		filebuf=$(cat $infile) 
+		infile2="inputfile2"
+		old="inputfile"
+		new="inputfile2"
+		while read i; do
+			j=$i;
+			i=""
+			echo "rem $i"
+
+			sed -e '/'$j'/d' <$old >$new
+		     	old=$new
+	        done <<< "$temp"
+		mv $old $infile
+	fi
+}
+
+sbn="":
+sen="":
+if [ "$#" -eq 0 ]
+then
+	echo "no arguments"
+        exit;
+fi
+
+arr=(`echo "$@" | tr ' ' ' '`)
+fname=${arr[0]}
+lname=${arr[1]}
+echo "name: $fname $lname"
+
+rem_data $fname $lname

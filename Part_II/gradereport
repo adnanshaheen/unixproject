@@ -1,0 +1,169 @@
+function finalgrade()
+{
+	maxmarks=0
+
+	infile=$1"_G2"
+	infile2=$1"_G3"
+	temp=$(grep "SID:" $infile)
+	temp+=":GRADE"
+	echo $temp > $infile2
+
+	if [ $# -lt 5 ]
+	then
+		echo "usage: ./gradereport <file> <e_per> <h_per> <q_per> <p_per> "
+		exit
+	fi
+
+	e_per=$2
+	h_per=$3
+	q_per=$4
+	p_per=$5
+	while read line
+	do
+		if [[ $line != "SID:"* ]]
+		then
+			arr=(`echo $line | tr ':' ' '`)
+			ne=${#arr[@]}
+			hi=`expr $ne - 4`
+			h=${arr["$hi"]}
+			qi=`expr $ne - 3`
+			q=${arr["$qi"]}
+			ei=`expr $ne - 2`
+			e=${arr["$ei"]}
+			pi=`expr $ne - 1`
+			p=${arr["$pi"]}
+			y=`expr $h \* $h_per + $e \* $e_per + $p \* $p_per + $q \* $q_per`
+
+			grdval=`expr $y / 100`
+			echo $line
+			echo "grade:" $grdval
+			if [ $grdval -gt $maxmarks ]
+			then
+				maxmarks=$grdval
+			fi
+			echo $line":"$grdval >> $infile2
+		fi
+	done <$infile
+}
+
+function calc_grade()
+{
+	infile=$1"_G3"
+	infile2=$1"_G4"
+	temp=$(grep "SID:" $infile)
+	temp+=":CURVE:LETTER"
+	echo $temp > $infile2
+
+	maxmarks=$2
+	pa=$3
+	pam=$4
+	pbp=$5
+	pb=$6
+	pbm=$7
+	pcp=$8
+	pc=$9
+	pcm=${10}
+	pdp=${11}
+	pd=${12}
+	pdm=${13}
+	pf=${14}
+
+	while read line
+	do
+		if [[ $line != "SID:"* ]]
+		then
+			arr=(`echo $line | tr ':' ' '`)
+			ne=${#arr[@]}
+			ne=`expr $ne - 1`
+			grdval=${arr["$ne"]}
+
+			cgrdval=`expr $grdval  \* 100 / $maxmarks`
+
+			if [ $cgrdval -ge $pam ] 
+			then
+				lgrdval="A"
+			elif [ $cgrdval -ge $pbm ]
+			then
+				lgrdval="B"
+			elif [ $cgrdval -ge $pcm ]
+			then
+				lgrdval="C"
+			elif [ $cgrdval -ge $pdm ]
+			then
+				lgrdval="D"
+			else
+				lgrdval="F"
+			fi
+
+			entry=$line":"$cgrdval":"$lgrdval
+			echo $entry
+			echo $entry >> $infile2
+		fi
+	done <$infile
+}
+
+infile=$1
+echo "ENTER $infile POLICY"
+echo "HOMEWORK........."
+read h_per
+echo "EXAMS..........."
+read e_per
+echo "QUIZS............"
+read q_per
+echo "PROJECTS........."
+read p_per
+
+echo "A................"
+read pa
+echo "A-................"
+read pam
+echo "B+................"
+read pbp
+echo "B................"
+read pb
+echo "B-................"
+read pbm
+echo "C+................"
+read pcp
+echo "C................"
+read pc
+echo "C-................"
+read pcm
+echo "D+................"
+read pdp
+echo "D................"
+read pd
+echo "D-................"
+read pdm
+echo "F................"
+read pf
+
+echo "DO YOU LIKE TO CURVE(Y/N)?"
+read cyn
+
+echo
+
+echo "HOW DO YOU LIKE TO CURVE?(1/2)"
+echo "1. ADD POINTS"
+echo "2. ADD (100 - HIGHEST GRADE) POINTS TO ALL STUDENTS"
+
+echo
+
+echo "ENTER YOUR OPTION:"
+read cot
+echo "HOW MANY POINTS:"
+read npnt
+
+echo
+echo "ALL GRADES WILL BE CURVED WITH $npnt POINTS. CONTINUE?(Y/N)"
+
+echo
+echo "CALCULATING THE FINAL GRADES......"
+
+echo
+echo "THE GRADES ARE CALCULATED AND SAVED..."
+
+finalgrade $1 $e_per $h_per $q_per $p_per
+
+echo $maxmarks
+calc_grade $1 $maxmarks $pa $pam $pbp $pb $pbm $pcp $pc $pcm $pdp $pd $pdm $pf

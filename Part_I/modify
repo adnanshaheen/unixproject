@@ -1,0 +1,149 @@
+modify_data()
+{
+	fname=$1
+	lname=$2
+	isflname=$3 #Y/N
+	ocurval=$4
+	onewval=$5
+	infile="inputfile"
+	filebuf=$(cat $infile)
+
+	key=$fname":"$lname":"
+	temp=$(egrep "$key" $infile)
+	echo $temp
+	if [ "$temp" ];
+	then
+		IN=$temp | sed -e 's/$IFS/\n/g'
+	       	filebuf=$(cat $infile) 
+		infile2="inputfile2"
+		old="inputfile"
+		new="inputfile2"
+		while read i; do
+			j=$i;
+			
+			i=$(echo $i | sed 's/'$ocurval'/'$onewval'/')
+			echo "change $i"
+
+			sed 's/'$j'/'$i'/' <$old >$new
+			old=$new
+		done <<< "$temp"
+		mv $new $infile
+	fi
+}
+
+
+sbn="":
+sen="":
+if [ "$#" -eq 0 ]
+then
+	echo "no arguments"
+        exit;
+fi
+
+counter="1"
+for i in "$@"
+do
+case $i in 
+	-email)
+        arr=(`echo "$@" | tr ' ' ' '`)
+	fname=${arr[1]}
+	lname=${arr[2]}
+	echo "updating email"
+	echo "name: $fname $lname"
+	echo "CURRENT EMAIL ADDRESS IS:"
+	read cur_email 
+	echo "ENTER NEW EMAIL ADDRESS:"
+	read new_email 
+
+	infile="inputfile"
+	filebuf=$(cat $infile)
+
+	key=$fname":"$lname":"[0123456789]\+":"$cur_email
+	temp=$(egrep "$key" $infile)
+	echo $temp
+	if [ "$temp" ];
+	then
+		IN=$temp | sed -e 's/$IFS/\n/g'
+		filebuf=$(cat $infile) 
+		infile2="inputfile2"
+		old="inputfile"
+		new="inputfile2"
+		while read i; do
+			j=$i;
+			i=$(echo $i | sed 's/'$cur_email'/'$new_email'/')
+			echo "change $i"
+
+			sed 's/'$j'/'$i'/' <$old >$new
+     			old=$new
+		done <<< "$temp"
+		mv $new $infile
+	fi
+
+	shift
+	;;
+
+	-sid)
+        arr=(`echo "$@" | tr ' ' ' '`)
+	fname=${arr[1]}
+	lname=${arr[2]}
+	echo "name: $fname $lname"
+	echo "CURRENT SID IS:"
+	read ocurdata 
+	echo "ENTER NEW SID:"
+	read onewdata 
+
+	modify_data $fname $lname "N" $ocurdata $onewdata
+	
+	shift
+	;;
+
+	-phone)
+        arr=(`echo "$@" | tr ' ' ' '`)
+	fname=${arr[1]}
+	lname=${arr[2]}
+	echo "name: $fname $lname"
+	echo "CURRENT PHONE NO. IS:"
+	read ocurdata 
+	echo "ENTER NEW PHONE NO.:"
+	read onewdata 
+
+	modify_data $fname $lname "N" $ocurdata $onewdata
+	
+	shift
+	;;
+
+	-fname)
+        arr=(`echo "$@" | tr ' ' ' '`)
+	fname=${arr[1]}
+	lname=${arr[2]}
+	echo "name: $fname $lname"
+	echo "ENTER NEW FIRST NAME:"
+	read onewdata 
+
+	modify_data $fname $lname "Y" $fname $onewdata
+	
+	shift
+	;;
+
+	-lname)
+        arr=(`echo "$@" | tr ' ' ' '`)
+	fname=${arr[1]}
+	lname=${arr[2]}
+	echo "name: $fname $lname"
+	echo "ENTER NEW LAST NAME:"
+	read onewdata 
+
+	modify_data $fname $lname "Y" $lname $onewdata
+	
+	shift
+	;;
+
+	--default)
+	shift
+	;;
+
+	*)
+	;;
+esac
+done
+

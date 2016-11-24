@@ -1,0 +1,22 @@
+emailsrvr="@email.com"
+inp="$@"
+if [[ $inp == *"leave_memo" ]]
+then
+	#echo leave
+	
+        arr=(`echo "$@" | tr ' ' ' '`)
+        ne=${#arr[@]}
+	ne=`expr $ne - 1`
+	counter="0"
+	while [ $counter -lt $ne ]
+	do
+       		memo=" I'll be out of the State next week"
+		echo "mailing leave_memo to ${arr[$counter]}$emailsrvr"
+		##echo $memo | mail -s "leave memo" ${arr[$counter]}$emailsrvr
+		counter=`expr $counter + 1`
+	done
+else
+	mail_id=$1
+	assignmentfile=$2
+	echo "mailing assignment:$assignmentfile to $mail_id$emailsrvr"
+fi

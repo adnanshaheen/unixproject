@@ -1,0 +1,21 @@
+infile="inputfile"
+while read line
+do
+	echo $line
+	arr=(`echo $line | tr ':' ' '`)
+	ne=${#arr[@]}
+	echo $ne
+	if [ $ne -eq "5" ]
+	then
+		filename=$1"_G"
+		if [ -f "$filename" ]
+		then
+			echo ${arr["2"]}":"${arr["0"]}":"${arr["1"]} >> $filename
+		else
+			echo "SID:LNAME:FNAME" > $filename
+			echo ${arr["2"]}":"${arr["0"]}":"${arr["1"]} >> $filename
+			
+		fi
+	fi
+	
+done <$infile 
